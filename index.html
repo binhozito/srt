@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>SRT Dos Chiorattos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0A1B33; /* azul bem escuro (TEMA DARK) */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: #003366; /* azul escuro */
+        }
+        #form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        /* inputs normais e textarea */
+        #form input[type="text"],
+        #form input[type="number"],
+        #form textarea {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #003366;
+            border-radius: 5px;
+            background-color: #1a2a4f;
+            color: #FFFFFF;
+        }
+        #textInput {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        /* COR DA SELEÇÃO DE TEXTO (AZUL CLARO) */
+        #textInput::selection {
+            background: #4cc2ff;   /* azul bem claro #8cc6ff */
+            color: #000000;        /* texto preto pra contraste */
+        }
+        #textInput::-moz-selection {
+            background: #8cc6ff;
+            color: #000000;
+        }
+
+        #form button {
+            width: 40%;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        #form button:hover {
+            background-color: #1a2a4f;
+            transform: translateY(-2px);
+        }
+
+        /* ================= SLIDERS ================= */
+
+        #form input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            width: 80%;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+        }
+
+        #form input[type=range]::-webkit-slider-runnable-track {
+            height: 0;
+            border-top: 3px solid #003366;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        #form input[type=range]::-moz-range-track {
+            height: 0;
+            border-top: 3px solid #003366;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        #form input[type=range]::-ms-track {
+            height: 0;
+            border-top: 3px solid #003366;
+            border-radius: 0;
+            background: transparent;
+            border-color: transparent;
+            color: transparent;
+        }
+
+        #form input[type=range]::-moz-range-progress {
+            height: 0;
+            border-top: 3px solid #003366;
+            background: transparent;
+        }
+
+        #form input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            background: #FFFFFF;
+            border: 2px solid #003366;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-top: -9px;
+        }
+
+        #form input[type=range]::-moz-range-thumb {
+            background: #FFFFFF;
+            border: 2px solid #003366;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        #form input[type=range]::-ms-thumb {
+            background: #FFFFFF;
+            border: 2px solid #003366;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        #blocks {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .block {
+            width: 80%;
+            padding: 15px;
+            background-color: #003366;
+            border: 1px solid #1a2a4f;
+            border-radius: 5px;
+            position: relative;
+            color: #FFFFFF;
+        }
+        /* bloco reprovado (501+ caracteres) */
+        .block.reprovado {
+            background-color: #cc0000;   /* vermelho */
+            border-color: #990000;
+        }
+        .block .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .block .info span {
+            font-size: 14px;
+            color: #FFFFFF;
+        }
+        .block button.copy {
+            background-color: #1a2a4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: background-color 0.3s;
+        }
+        .block button.copy.copied {
+            background-color: #0055aa;
+            color: black;
+        }
+        .block button.copy:hover {
+            background-color: #0055aa;
+        }
+        .error {
+            background-color: #ffdddd;
+            color: red;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid red;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #srt-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #thanks {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+            color: #003366;
+        }
+        #preview {
+            margin-bottom: 20px;
+            color: #003366;
+            text-align: center;
+        }
+
+        /* ============================= */
+        /* AJUSTES DE COR (APENAS ADIÇÃO) */
+        /* ============================= */
+
+        body {
+            color: #a4adc2; /* texto padrão */
+        }
+
+        h2 {
+            color: #a4adc2;
+        }
+
+        /* labels, spans, textos menores */
+        #form label,
+        #form span,
+        #thanks,
+        #preview,
+        #totalInfo,
+        #rejectedBlocks {
+            color: #a4adc2;
+        }
+
+        /* Texto dos botões */
+        #form button {
+            color: #a4adc2;
+        }
+
+        /* Texto dentro dos blocos */
+        .block {
+            color: #a4adc2;
+        }
+
+        /* Texto das informações dos blocos */
+        .block .info span {
+            color: #a4adc2 !important;
+        }
+
+        /* Botão copiar dentro dos blocos */
+        .block button.copy {
+            color: #a4adc2;
+        }
+
+        .block button.copy:hover {
+            color: #000000;
+        }
+
+        .block button.copy.copied {
+            color: #000000;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <h2>SRT Dos Chiorattos</h2>
+    <div id="form">
+        <input type="text" id="fileName" placeholder="Nome do arquivo" />
+        <input type="number" id="charCount" placeholder="Dividir em quantos caracteres:" value="490" />
+        <textarea id="textInput" rows="10" placeholder="Insira o texto aqui..."></textarea>
+        <button onclick="divideTextByChars()">Dividir por Caracteres</button>
+        <button onclick="resetForm()">Redefinir</button>
+        <label for="speed">Espaçamento entre áudios:</label>
+        <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1">
+        <span id="speedValue">1.0x</span>
+        <label for="readingRate">Caracteres por segundo:</label>
+        <input type="range" id="readingRate" min="10" max="50" step="1" value="14">
+        <span id="readingRateValue">14 c/s</span>
+        <button onclick="exportToSrt()">Exportar para SRT</button>
+        <button onclick="exportToPdf()">Exportar para PDF</button>
+    </div>
+
+    <p id="thanks"><b>Cada dia é uma luta para conquistar o sonho, por isso, quando chegar lá não se esqueça, foi só vocês três, SOZINHOS, que batalharam JUNTOS por esse momento! 1 - Deus | 2 - Binho | 3 - Juca</b></p>
+
+    <div id="preview"></div>
+    <p><div id="totalInfo" style="text-align: center; font-size: 17px; color: #a4adc2; margin-bottom: 4px;"></div></p>
+    <div id="rejectedBlocks" style="text-align: center; font-size: 16px; margin-bottom: 10px;"></div><br>
+    <div id="blocks"></div>
+
+    <script>
+        const PAUSE_TIME = 0.9;
+
+        document.getElementById('speed').addEventListener('input', function() {
+            document.getElementById('speedValue').innerText = this.value + 'x';
+        });
+
+        document.getElementById('readingRate').addEventListener('input', function() {
+            document.getElementById('readingRateValue').innerText = this.value + ' c/s';
+        });
+
+        function copyToClipboard(text, button) {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            if (button) {
+                button.classList.add('copied');
+                button.textContent = 'Copiado!';
+            }
+        }
+
+        function exportToSrt() {
+            const speed = parseFloat(document.getElementById('speed').value);
+            const blocks = document.querySelectorAll('.block .srt');
+            let srtContent = '';
+            blocks.forEach((block, index) => {
+                const startTime = adjustTimestamp(block.dataset.startTime, speed);
+                const endTime = adjustTimestamp(block.dataset.endTime, speed);
+                srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${block.innerText.trim()}\n\n`;
+            });
+            downloadSrtFile(srtContent.trim());
+        }
+
+        function adjustTimestamp(timestamp, speed) {
+            if (!timestamp) return '00:00:00,000';
+
+            const parts = timestamp.split(':');
+            const hours = parseInt(parts[0]);
+            const minutes = parseInt(parts[1]);
+            const secondsParts = parts[2].split(',');
+            const seconds = parseInt(secondsParts[0]);
+            const milliseconds = parseInt(secondsParts[1]);
+
+            let totalMilliseconds =
+                ((hours * 3600 + minutes * 60 + seconds) * 1000 + milliseconds) * speed;
+
+            const newHours = Math.floor(totalMilliseconds / 3600000);
+            totalMilliseconds %= 3600000;
+            const newMinutes = Math.floor(totalMilliseconds / 60000);
+            totalMilliseconds %= 60000;
+            const newSeconds = Math.floor(totalMilliseconds / 1000);
+            const newMilliseconds = totalMilliseconds % 1000;
+
+            return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}:${String(newSeconds).padStart(2, '0')},${String(newMilliseconds).padStart(3, '0')}`;
+        }
+
+        function downloadSrtFile(content) {
+            const fileName = document.getElementById('fileName').value || 'subtitles';
+            const blob = new Blob([content], { type: 'text/srt' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}.srt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function createBlock(type, content, startTime, endTime, isRejected) {
+            const blockDiv = document.createElement('div');
+            blockDiv.classList.add('block');
+            if (isRejected) {
+                blockDiv.classList.add('reprovado');
+            }
+            blockDiv.innerHTML = `
+                <div class="info">
+                    <span>${type}</span>
+                    <span>${content.length} caracteres, ${content.split(/\s+/).length} palavras</span>
+                </div>
+                <div class="srt" data-start-time="${formatTimestamp(startTime)}" data-end-time="${formatTimestamp(endTime)}">
+                    ${content}
+                </div>
+            `;
+            document.getElementById('blocks').appendChild(blockDiv);
+        }
+
+        function divideTextByChars() {
+            if (!validateCharCount()) return;
+            const charCount = document.getElementById('charCount').value;
+            const text = document.getElementById('textInput').value;
+
+            const totalChars = text.length;
+            const totalWords = text.split(/\s+/).filter(word => word.length > 0).length;
+
+            const blocks = getTextBlocksWithCustomLength(text, parseInt(charCount));
+            document.getElementById('blocks').innerHTML = '';
+            let currentTime = 0;
+            const readingRate = parseInt(document.getElementById('readingRate').value);
+
+            let rejectedCount = 0;
+            const rejectedBlocks = [];
+
+            blocks.forEach((block, index) => {
+                const duration = block.length / readingRate;
+                const startTime = currentTime;
+                const endTime = currentTime + duration;
+
+                const isRejected = block.length >= 501;
+                if (isRejected) {
+                    rejectedCount++;
+                    rejectedBlocks.push(index + 1); // guarda o número do bloco (1-based)
+                }
+
+                createBlock(`Bloco ${index + 1}`, block, startTime, endTime, isRejected);
+                currentTime = endTime + PAUSE_TIME;
+            });
+
+            document.getElementById('totalInfo').textContent =
+                `Total de caracteres: ${totalChars} | Total de palavras: ${totalWords} | ${rejectedCount} blocos reprovados`;
+
+            const rejectedDiv = document.getElementById('rejectedBlocks');
+            if (rejectedBlocks.length > 0) {
+                const labels = rejectedBlocks.map(n => `Bloco ${n}`);
+                let listText;
+                if (labels.length === 1) {
+                    listText = labels[0];
+                } else if (labels.length === 2) {
+                    listText = `${labels[0]} e ${labels[1]}`;
+                } else {
+                    listText = `${labels.slice(0, -1).join(', ')} e ${labels[labels.length - 1]}`;
+                }
+                rejectedDiv.textContent = `Blocos reprovados: ${listText}.`;
+            } else {
+                rejectedDiv.textContent = '';
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('charCount').value = '490';
+            document.getElementById('textInput').value = '';
+            document.getElementById('blocks').innerHTML = '';
+            document.getElementById('totalInfo').textContent = '';
+            document.getElementById('rejectedBlocks').textContent = '';
+        }
+
+        function validateCharCount() {
+            const charCount = document.getElementById('charCount').value;
+            if (isNaN(charCount) || charCount <= 0) {
+                showError("Por favor, insira um número válido de caracteres.");
+                return false;
+            }
+            return true;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.classList.add('error');
+            errorDiv.textContent = message;
+            document.body.prepend(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3000);
+        }
+
+        function getTextBlocksWithCustomLength(text, maxLength) {
+            text = formatText(text);
+            return splitTextIntoBlocks(text, maxLength);
+        }
+
+        function formatText(text) {
+            text = text.replace(/\"/g, "'");
+            text = text.replace(/«/g, "'").replace(/»/g, "'");
+            text = text.replace(/\n/g, " ");
+            text = text.replace(/([a-zA-Z])([.,!?;:])/g, "$1 $2");
+            text = text.replace(/([.,!?;:])([a-zA-Z])/g, "$1 $2");
+            text = text.replace(/([.,!?;:])([.,!?;:])/g, "$1 $2")
+                       .replace(/([.,!?;:])\s([.,!?;:])/g, "$1$2");
+            text = text.replace(/\. \. \./g, "...");
+            text = addSpacesAroundSingleQuotes(text);
+            return text;
+        }
+
+        function addSpacesAroundSingleQuotes(text) {
+            return text.replace(/(\B')(?=\w)|(?<=\w)('\B)/g, "$1 $2");
+        }
+
+        function splitTextIntoBlocks(text, maxLength) {
+            const blocks = [];
+            let currentBlock = "";
+            const sentences = text.split(/(?<=\.|\?|!)(?=\s)/g);
+
+            for (let i = 0; i < sentences.length; i++) {
+                const sentence = sentences[i].trim();
+                if ((currentBlock.length + sentence.length + 1) <= maxLength) {
+                    currentBlock += sentence + " ";
+                } else {
+                    if (currentBlock.trim().length > 0) {
+                        blocks.push(currentBlock.trim());
+                    }
+                    currentBlock = sentence + " ";
+                }
+            }
+
+            if (currentBlock.trim().length > 0) {
+                blocks.push(currentBlock.trim());
+            }
+
+            return blocks;
+        }
+
+        function formatTimestamp(seconds) {
+            const date = new Date(seconds * 1000);
+            const hours = String(date.getUTCHours()).padStart(2, '0');
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const secs = String(date.getUTCSeconds()).padStart(2, '0');
+            const millis = String(date.getUTCMilliseconds()).padStart(3, '0');
+            return `${hours}:${minutes}:${secs},${millis}`;
+        }
+
+        async function exportToPdf() {
+            const { jsPDF } = window.jspdf;
+            const fileName = document.getElementById('fileName').value || 'documento';
+
+            const doc = new jsPDF();
+            const blocks = document.querySelectorAll('.block');
+
+            if (blocks.length > 0) {
+                let y = 10;
+
+                blocks.forEach((block, index) => {
+                    const blockContent = block.querySelector('.srt').innerText;
+                    const blockInfo = `Bloco ${index + 1}\n${blockContent}`;
+
+                    const lines = doc.splitTextToSize(blockInfo, 180);
+                    lines.forEach(line => {
+                        doc.text(line, 10, y);
+                        y += 10;
+
+                        if (y > 270) {
+                            doc.addPage();
+                            y = 10;
+                        }
+                    });
+
+                    y += 10;
+                });
+            } else {
+                const text = document.getElementById('textInput').value;
+                const lines = doc.splitTextToSize(text, 180);
+
+                let y = 10;
+                lines.forEach((line) => {
+                    doc.text(line, 10, y);
+                    y += 10;
+
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 10;
+                    }
+                });
+            }
+
+            doc.save(`${fileName}.pdf`);
+        }
+    </script>
+</body>
+</html>
